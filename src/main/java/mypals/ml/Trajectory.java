@@ -253,7 +253,7 @@ public class Trajectory implements ModInitializer {
 			return new ArrayList<>();
 	}
 
-	public List<Vec3d> calculateTrajectoryForEntity(ParticleEffect trace,ParticleEffect particleHit,Entity entity, World world, double gravity, float drag) {
+	public List<Vec3d> calculateTrajectoryForEntity(ParticleEffect particleHit,Entity entity, World world, double gravity, float drag) {
 		List<Vec3d> trajectoryPoints = new ArrayList<>();
 		double posX = entity.getX();
 		double posY = entity.getY();
@@ -272,7 +272,6 @@ public class Trajectory implements ModInitializer {
 				world.addParticle(particleHit, hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z, 0, 0, 0);
 				break;
 			}
-			world.addParticle(trace, posX, posY, posZ, 0, 0, 0);
 			trajectoryPoints.add(newPosition);
 			posX = newPosition.x;
 			posY = newPosition.y;
@@ -344,24 +343,30 @@ public class Trajectory implements ModInitializer {
 		projectilesStrate.addAll(world.getEntitiesByType(EntityType.BREEZE_WIND_CHARGE, searchBox, entity -> true));
 
 		for (Entity projectile : projectilesSimple) {
-			List<Vec3d> points = calculateTrajectoryForEntity(mark, particleHit, projectile, world, 0.03f, 0.99f);
+			List<Vec3d> points = calculateTrajectoryForEntity(particleHit, projectile, world, 0.03f, 0.99f);
+			world.addParticle(mark, projectile.getPos().x, projectile.getPos().y, projectile.getPos().z, 0, 0, 0);
 			for(Vec3d v: points)
 			{
 				world.addParticle(particleTrace, v.x, v.y, v.z,0, 0, 0);
+
 			}
 		}
 		for (Entity projectile : projectilesComplex) {
-			List<Vec3d> points = calculateTrajectoryForEntity(mark, particleHit, projectile, world,0.05f, 0.99f);
+			List<Vec3d> points = calculateTrajectoryForEntity(particleHit, projectile, world,0.05f, 0.99f);
+			world.addParticle(mark, projectile.getPos().x, projectile.getPos().y, projectile.getPos().z, 0, 0, 0);
 			for(Vec3d v: points)
 			{
 				world.addParticle(particleTrace, v.x, v.y, v.z,0, 0, 0);
+
 			}
 		}
 		for (Entity projectile : projectilesStrate) {
-			List<Vec3d> points = calculateTrajectoryForEntity(mark, particleHit, projectile, world,0f, 0.99f);
+			List<Vec3d> points = calculateTrajectoryForEntity(particleHit, projectile, world,0f, 0.99f);
+			world.addParticle(mark, projectile.getPos().x, projectile.getPos().y, projectile.getPos().z, 0, 0, 0);
 			for(Vec3d v: points)
 			{
 				world.addParticle(particleTrace, v.x, v.y, v.z,0, 0, 0);
+
 			}
 		}
 	}
