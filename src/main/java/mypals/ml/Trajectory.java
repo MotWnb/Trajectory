@@ -23,8 +23,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,14 +32,11 @@ import java.util.Set;
 public class Trajectory implements ModInitializer {
 	public static Set<Item> Type1 = new HashSet<>();
 	public static Set<Item> Type2 = new HashSet<>();
-	public static final String MOD_ID = "trajectory";
 
 	public static boolean showInfo = false;
 	public static int handSide = 1;
 
 	public static Vec3d hitPoint = new Vec3d(0, 0, 0);
-
-	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	@Override
 	public void onInitialize() {
@@ -55,7 +50,6 @@ public class Trajectory implements ModInitializer {
 			}
 		});
 
-		LOGGER.info("Hello Fabric world!");
 
 		Type1.add(Items.ENDER_PEARL.asItem());
 		Type1.add(Items.SNOWBALL.asItem());
@@ -77,7 +71,7 @@ public class Trajectory implements ModInitializer {
 		World world = client.world;
 		ForThisPlayer();
 		ForOtherPlayers();
-		ForOtherEntitys();
+		ForOtherEntity();
         assert world != null;
         ForProjectiles(ParticleTypes.FLAME, ParticleTypes.ELECTRIC_SPARK, ParticleTypes.SONIC_BOOM,world, 128);
 	}
@@ -91,34 +85,33 @@ public class Trajectory implements ModInitializer {
 		float yaw = player.getYaw();
 		ItemStack itemStack = player.getMainHandStack();
 		ItemStack itemStackAlt = player.getOffHandStack();
-		if (player != null) {
-			if (isNormalProjectile(itemStack) || isComplexProjectile(itemStack)) { handSide = 1;showInfo = true;}
-			else if (isNormalProjectile(itemStackAlt) || isComplexProjectile(itemStackAlt)) { handSide = -1; showInfo = true;}
-			else {showInfo = false;}
+		if (isNormalProjectile(itemStack) || isComplexProjectile(itemStack)) { handSide = 1;showInfo = true;}
+		else if (isNormalProjectile(itemStackAlt) || isComplexProjectile(itemStackAlt)) { handSide = -1; showInfo = true;}
+		else {showInfo = false;}
 
-			if (isNormalProjectile(itemStack) || isNormalProjectile(itemStackAlt)) {
+		if (isNormalProjectile(itemStack) || isNormalProjectile(itemStackAlt)) {
 
-				float speed = 1.5f;
-				float gravity = 0.03f;
+			float speed = 1.5f;
+			float gravity = 0.03f;
 
-				// 执行简单投掷物轨迹计算
-				renderTrajectoryWithParticles(ParticleTypes.GLOW, ParticleTypes.SONIC_BOOM,world, player, pitch,yaw, speed, gravity, true);
-			} else if (isComplexProjectile(itemStack) || isComplexProjectile(itemStackAlt)) {
-				// 执行复杂投掷物轨迹计算
+			// 执行简单投掷物轨迹计算
+			renderTrajectoryWithParticles(ParticleTypes.GLOW, ParticleTypes.SONIC_BOOM,world, player, pitch,yaw, speed, gravity, true);
+		} else if (isComplexProjectile(itemStack) || isComplexProjectile(itemStackAlt)) {
+			// 执行复杂投掷物轨迹计算
 
-				float bowMultiplier = (72000.0f - player.getItemUseTimeLeft()) / 20.0f;
-				bowMultiplier = (bowMultiplier * bowMultiplier + bowMultiplier * 2.0f) / 3.0f;
-				if (bowMultiplier > 1.0f) {
-					bowMultiplier = 1.0f;
-				}
-				float gravity = 0.05f;
-				float speed = bowMultiplier * 3.0f;
-				if(player.getItemUseTimeLeft() == 0)
-				{
-					speed = 0f;
-				}
-				renderTrajectoryWithParticles(ParticleTypes.GLOW, ParticleTypes.SONIC_BOOM,world, player, pitch,yaw, speed, gravity, true);
+			float bowMultiplier = (72000.0f - player.getItemUseTimeLeft()) / 20.0f;
+			bowMultiplier = (bowMultiplier * bowMultiplier + bowMultiplier * 2.0f) / 3.0f;
+			if (bowMultiplier > 1.0f) {
+				bowMultiplier = 1.0f;
 			}
+			float gravity = 0.05f;
+			float speed = bowMultiplier * 3.0f;
+			if(player.getItemUseTimeLeft() == 0)
+			{
+				speed = 0f;
+			}
+			renderTrajectoryWithParticles(ParticleTypes.GLOW, ParticleTypes.SONIC_BOOM,world, player, pitch,yaw, speed, gravity, true);
+
 		}
 	}
 	public static void ForOtherPlayers()
@@ -138,8 +131,11 @@ public class Trajectory implements ModInitializer {
 						float yaw = p.getYaw();
 						ItemStack itemStack = p.getMainHandStack();
 						ItemStack itemStackAlt = p.getOffHandStack();
-						if (isNormalProjectile(itemStack) || isNormalProjectile(itemStack)) { handSide = 1;}
-						else if (isNormalProjectile(itemStackAlt) || isNormalProjectile(itemStackAlt)) { handSide = -1; };
+						if (isNormalProjectile(itemStack) || isComplexProjectile(itemStack)) {
+							handSide = 1;
+						} else if (isNormalProjectile(itemStackAlt) || isComplexProjectile(itemStackAlt)) {
+							handSide = -1;
+						}
 
 						if (isNormalProjectile(itemStack) || isNormalProjectile(itemStackAlt)) {
 
@@ -169,7 +165,7 @@ public class Trajectory implements ModInitializer {
 			}
 		}
 	}
-	public static void ForOtherEntitys()
+	public static void ForOtherEntity()
 	{
 		MinecraftClient client = MinecraftClient.getInstance();
 		World world = client.world;
@@ -185,8 +181,11 @@ public class Trajectory implements ModInitializer {
 						float yaw = livingEntity.getYaw();
 						ItemStack itemStack = livingEntity.getMainHandStack();
 						ItemStack itemStackAlt = livingEntity.getOffHandStack();
-						if (isNormalProjectile(itemStack) || isNormalProjectile(itemStack)) { handSide = 1;}
-						else if (isNormalProjectile(itemStackAlt) || isNormalProjectile(itemStackAlt)) { handSide = -1; };
+						if (isNormalProjectile(itemStack) || isComplexProjectile(itemStack)) {
+							handSide = 1;
+						} else if (isNormalProjectile(itemStackAlt) || isComplexProjectile(itemStackAlt)) {
+							handSide = -1;
+						}
 
 						if (isNormalProjectile(itemStack) || isNormalProjectile(itemStackAlt)) {
 
@@ -229,13 +228,14 @@ public class Trajectory implements ModInitializer {
 			Vec3d Velocity = new Vec3d(speedVecC.x, speedVecC.y, speedVecC.z);
 			Vec3d entityPos = new Vec3d(0, 0 + 1.5, 0);
 
-			SnowballEntity modleEntity = new SnowballEntity(world, player);
+			SnowballEntity modleEntity = new SnowballEntity(EntityType.SNOWBALL, world);
+			modleEntity.setOwner(player);
 
 			for (int i = 0; i < 100; i++) {
 				HitResult hitResult = world.raycast(new RaycastContext(new Vec3d(posX + entityPos.x, posY + entityPos.y, posZ + entityPos.z), new Vec3d(posX + entityPos.x, posY + entityPos.y, posZ + entityPos.z).add(Velocity), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, modleEntity));
 				if (hitResult.getType() != HitResult.Type.MISS) {
 					hitPoint = new Vec3d(hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z);
-					world.addParticle(particleHit, hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z, 0, 0, 0);
+					world.addParticleClient(particleHit, hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z, 0, 0, 0);
 					break;
 				}
 
@@ -269,7 +269,7 @@ public class Trajectory implements ModInitializer {
 					entity));
 
 			if (hitResult.getType() != HitResult.Type.MISS) {
-				world.addParticle(particleHit, hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z, 0, 0, 0);
+				world.addParticleClient(particleHit, hitResult.getPos().x, hitResult.getPos().y, hitResult.getPos().z, 0, 0, 0);
 				break;
 			}
 			trajectoryPoints.add(newPosition);
@@ -327,13 +327,11 @@ public class Trajectory implements ModInitializer {
 
 		projectilesSimple.addAll(world.getEntitiesByType(EntityType.SNOWBALL,searchBox, entity -> true));
 		projectilesSimple.addAll(world.getEntitiesByType(EntityType.EGG,searchBox, entity -> true));
-		projectilesSimple.addAll(world.getEntitiesByType(EntityType.POTION,searchBox, entity -> true));
+		projectilesSimple.addAll(world.getEntitiesByType(EntityType.LINGERING_POTION, searchBox, entity -> true));
 		projectilesSimple.addAll(world.getEntitiesByType(EntityType.ENDER_PEARL,searchBox, entity -> true));
-
 		projectilesComplex.addAll(world.getEntitiesByType(EntityType.TRIDENT, searchBox, trident -> !trident.isOnGround()));
 		projectilesComplex.addAll(world.getEntitiesByType(EntityType.SPECTRAL_ARROW,searchBox, spectralArrow -> !spectralArrow.isOnGround()));
 		projectilesComplex.addAll(world.getEntitiesByType(EntityType.ARROW,searchBox, arrow -> !arrow.isOnGround()));
-
 		projectilesStrate.addAll(world.getEntitiesByType(EntityType.FIREBALL, searchBox, entity -> true));
 		projectilesStrate.addAll(world.getEntitiesByType(EntityType.DRAGON_FIREBALL, searchBox, entity -> true));
 		projectilesStrate.addAll(world.getEntitiesByType(EntityType.SMALL_FIREBALL, searchBox, entity -> true));
@@ -344,28 +342,28 @@ public class Trajectory implements ModInitializer {
 
 		for (Entity projectile : projectilesSimple) {
 			List<Vec3d> points = calculateTrajectoryForEntity(particleHit, projectile, world, 0.03f, 0.99f);
-			world.addParticle(mark, projectile.getPos().x, projectile.getPos().y, projectile.getPos().z, 0, 0, 0);
+			world.addParticleClient(mark, projectile.getPos().x, projectile.getPos().y, projectile.getPos().z, 0, 0, 0);
 			for(Vec3d v: points)
 			{
-				world.addParticle(particleTrace, v.x, v.y, v.z,0, 0, 0);
+				world.addParticleClient(particleTrace, v.x, v.y, v.z,0, 0, 0);
 
 			}
 		}
 		for (Entity projectile : projectilesComplex) {
 			List<Vec3d> points = calculateTrajectoryForEntity(particleHit, projectile, world,0.05f, 0.99f);
-			world.addParticle(mark, projectile.getPos().x, projectile.getPos().y, projectile.getPos().z, 0, 0, 0);
+			world.addParticleClient(mark, projectile.getPos().x, projectile.getPos().y, projectile.getPos().z, 0, 0, 0);
 			for(Vec3d v: points)
 			{
-				world.addParticle(particleTrace, v.x, v.y, v.z,0, 0, 0);
+				world.addParticleClient(particleTrace, v.x, v.y, v.z,0, 0, 0);
 
 			}
 		}
 		for (Entity projectile : projectilesStrate) {
 			List<Vec3d> points = calculateTrajectoryForEntity(particleHit, projectile, world,0f, 0.99f);
-			world.addParticle(mark, projectile.getPos().x, projectile.getPos().y, projectile.getPos().z, 0, 0, 0);
+			world.addParticleClient(mark, projectile.getPos().x, projectile.getPos().y, projectile.getPos().z, 0, 0, 0);
 			for(Vec3d v: points)
 			{
-				world.addParticle(particleTrace, v.x, v.y, v.z,0, 0, 0);
+				world.addParticleClient(particleTrace, v.x, v.y, v.z,0, 0, 0);
 
 			}
 		}
@@ -381,7 +379,7 @@ public class Trajectory implements ModInitializer {
 		}
 		for(Vec3d v: points)
 		{
-			world.addParticle(particleTrace, v.x, v.y, v.z,0, 0, 0);
+			world.addParticleClient(particleTrace, v.x, v.y, v.z,0, 0, 0);
 		}
 	}
 
